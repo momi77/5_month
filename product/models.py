@@ -1,6 +1,7 @@
 from django.db import models
 
 
+
 class CategoryModel(models.Model):
     name = models.CharField(max_length=255)
 
@@ -17,8 +18,9 @@ class ProductModel(models.Model):
         return f"{self.title} - {self.price}"
 
 class ReviewModel(models.Model):
-    text = models.CharField(max_length=500)
-    product = models.ForeignKey(ProductModel, on_delete=models.CASCADE)
+    text = models.TextField()
+    star = models.IntegerField(choices=((i, i) for i in range(1, 6)), default=5)
+    product = models.ForeignKey(ProductModel, on_delete=models.CASCADE, related_name='reviews')
 
     def __str__(self) -> str:
         return f"{self.product}"

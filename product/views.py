@@ -3,12 +3,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from product.models import ProductModel, CategoryModel, ReviewModel
 from product.serializers import CategoryListSerializer, ProductListSerializer, ReviewListSerializer
+from django.db.models import Count
 
 @api_view(['GET'])
 def products_list_api_view(request):
-    products = ProductModel.objects.all()
+    products = ProductModel.objects.prefetch_related('reviews').all()
     data = ProductListSerializer(products, many=True).data
-    return Response(data=data, status=status.HTTP_200_OK)
+    return Response(data=data)
 
 @api_view(['GET'])
 def products_detail_api_view(request, product_id):
@@ -26,9 +27,9 @@ def products_detail_api_view(request, product_id):
     
 @api_view(['GET'])
 def categories_list_api_view(request):
-    categories = CategoryModel.objects.all()
+    categories = CategoryModel.objects.annotate(products_count=Count('productmodel'))
     data = CategoryListSerializer(categories, many=True).data
-    return Response(data=data, status=status.HTTP_200_OK)
+    return Response(data=data)
 
 @api_view(['GET'])
 def categories_detail_api_view(request, category_id):
