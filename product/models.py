@@ -12,7 +12,12 @@ class ProductModel(models.Model):
     title = models.CharField(max_length=255)
     description = models.CharField(max_length=1000)
     price = models.FloatField()
-    category = models.ForeignKey(CategoryModel, on_delete=models.CASCADE)
+    category = models.ForeignKey(
+    CategoryModel,
+    on_delete=models.CASCADE,
+    related_name='products'
+)
+
 
     def __str__(self) -> str:
         return f"{self.title} - {self.price}"

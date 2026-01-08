@@ -25,3 +25,21 @@ class CategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = CategoryModel
         fields = ['id', 'name', 'products_count']
+
+
+class CategoryCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoryModel
+        fields = ['id', 'name']
+
+
+class ProductCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductModel
+        fields = ['id', 'title', 'description', 'price', 'category']
+
+
+class ReviewCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReviewModel
+        fields = ['id', 'text', 'star', 'product']
