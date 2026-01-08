@@ -63,8 +63,8 @@ def products_detail_api_view(request, product_id):
 def categories_list_api_view(request):
     if request.method == 'GET':
         categories = CategoryModel.objects.annotate(
-            products_count=Count('productmodel_set')
-        )
+    products_count=Count('products')
+)
         data = CategoryListSerializer(categories, many=True).data
         return Response(data=data)
 

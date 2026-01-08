@@ -28,18 +28,46 @@ class CategoryListSerializer(serializers.ModelSerializer):
 
 
 class CategoryCreateSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+        max_length=255,
+        required=True,  # обязательное поле
+        allow_blank=False  # нельзя пустое
+    )
+
     class Meta:
         model = CategoryModel
         fields = ['id', 'name']
 
+    # дополнительная проверка уникальности
+    def validate_name(self, value):
+        if CategoryModel.objects.filter(name=value).exists():
+            raise serializers.ValidationError("Категория с таким именем уже существует")
+        return value
+
 
 class ProductCreateSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(max_length=255, required=True, allow_blank=False)
+    description = serializers.CharField(max_length=1000, required=True)
+    price = serializers.FloatField(min_value=0)  # цена >= 0
+    category = serializers.PrimaryKeyRelatedField(queryset=CategoryModel.objects.all())
+
     class Meta:
         model = ProductModel
         fields = ['id', 'title', 'description', 'price', 'category']
 
+    # дополнительная проверка, например, длина title
+    def validate_title(self, value):
+        if len(value) < 3:
+            raise serializers.ValidationError("Название товара должно быть минимум 3 символа")
+        return value
+
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
+    text = serializers.CharField(required=True, allow_blank=False)
+    star = serializers.IntegerField(min_value=1, max_value=5)  # рейтинг от 1 до 5
+    product = serializers.PrimaryKeyRelatedField(queryset=ProductModel.objects.all())
+
     class Meta:
         model = ReviewModel
         fields = ['id', 'text', 'star', 'product']
+
