@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  product_show_api:
+    build: .
+    container_name: product_show_api
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8001:8000"
+    depends_on:
+      - product_data
+    env_file:
+      - .env
+
+  product_data:
+    image: postgres:14
+    container_name: product_data
+    environment:
+      POSTGRES_DB: shop_api_db
+      POSTGRES_USER: new_user2
+      POSTGRES_PASSWORD: 1234
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+volumes:
+  postgres_data:
