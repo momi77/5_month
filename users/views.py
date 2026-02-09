@@ -8,6 +8,13 @@ from .serializers import CustomTokenObtainPairSerializer, RegisterSerializer, Co
 from .models import ConfirmationCode
 from users.models import CustomUser
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework import status
+from confirmation.utils import save_confirmation_code, check_and_delete_confirmation_code
+import random
+
+
+
+
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -22,24 +29,24 @@ class RegisterView(generics.CreateAPIView):
 
 class ConfirmView(generics.CreateAPIView):
     serializer_class = ConfirmSerializer
+
     def post(self, request):
         serializer = ConfirmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         code = serializer.validated_data["code"]
+        user = request.user
 
-        try:
-            conf = ConfirmationCode.objects.get(code=code)
-        except ConfirmationCode.DoesNotExist:
-            return Response({"error": "Invalid code"}, status=400)
+        if not user.is_authenticated:
+            return Response({"error": "Log in!"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        user = conf.user
-        user.is_active = True
-        user.save()
-
-        conf.delete()
-
-        return Response({"message": "Account verified successfully"}, status=200)
+        # Проверяем код в Redis
+        if check_and_delete_confirmation_code(user.id, code):
+            user.is_active = True
+            user.save()
+            return Response({"message": "Account has been successfully verified!"}, status=200)
+        else:
+            return Response({"error": "Invalid or expired code"}, status=400)
 
 
 
@@ -60,3 +67,17 @@ class LoginView(APIView):
 
         token, _ = Token.objects.get_or_create(user=user)
         return Response({"token": token.key})
+    
+
+class SendConfirmationCodeView(APIView):
+    def post(self, request):
+        user = request.user
+        if not user.is_authenticated:
+            return Response({"error": "Log in!"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        code = f"{random.randint(100000, 999999)}" 
+        save_confirmation_code(user.id, code) 
+
+        print(f"Users's confirmation code {user.email}: {code}")
+
+        return Response({"message": "The code has been sent"}, status=status.HTTP_200_OK)
