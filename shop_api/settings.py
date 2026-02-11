@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 from datetime import timedelta
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,10 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True if config('DEBUG') == 'on' else False
 
 ALLOWED_HOSTS = []
 
@@ -189,3 +190,18 @@ CACHES = {
         }
     }
 }
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/4'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/4'
+
+
+
+
+# Для реального отправления через Gmail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_USER')  # в .env
+EMAIL_HOST_PASSWORD = config('EMAIL_PASS')  # в .env
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

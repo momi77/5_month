@@ -45,23 +45,23 @@ class ProductListAPIView(ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-    def get(self, request, *args, **kwargs):
-        cached_data = cache.get("list_of_products")
-        if cached_data:
-            print("Loaded from Redis")
-            return Response(data=cached_data, status=status.HTTP_200_OK)
-        print("Loaded from Postgres")
-        response = super().get(self, request, *args, **kwargs)
-        if response.data.get("total", 0) > 0:
-            cache.set("list_of_products", response.data, timeout=60)  # Кэшируем на 60 секунд
-        return response
+def get(self, request, *args, **kwargs):
+   
+    cached_data = cache.get("list_of_products")
+    if cached_data:
+        print("Loaded from Redis")
+        return Response(data=cached_data, status=200)
 
-        if cached_data:
-            return Response(cached_data)
+    
+    print("Loaded from Postgres")
+    response = super().get(request, *args, **kwargs)
 
-        response = super().get(request, *args, **kwargs)
-        cache.set(cache_key, response.data, timeout=60)  # Кэшируем на 60 секунд
-        return response
+    
+    if response.data:  
+        cache.set("list_of_products", response.data, timeout=60)  
+
+    return response
+
 
 # @api_view(['GET', 'PUT', 'DELETE'])
 # def products_detail_api_view(request, product_id):

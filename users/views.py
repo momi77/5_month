@@ -11,6 +11,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import status
 from confirmation.utils import save_confirmation_code, check_and_delete_confirmation_code
 import random
+from users.tasks import add        
 
 
 
@@ -52,6 +53,7 @@ class ConfirmView(generics.CreateAPIView):
 
 class LoginView(APIView):
     def post(self, request):
+        add.delay(2,5)  # Пример вызова задачи Celery для сложения чисел    ssddsdd
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
